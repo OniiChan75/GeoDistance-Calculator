@@ -31,7 +31,7 @@ python client.py
 
 2. Navigate to the server directory.
 
-3. Modify the `server_port` in the `server.py` script if needed.
+3. Modify the `server_address` and `server_port` in the `server.py` script if needed.
 
 4. Run the server script:
 ```bash
