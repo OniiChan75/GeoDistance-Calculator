@@ -2,7 +2,7 @@ import socket
 import select
 
 # IP address and port of the server you want to connect to
-server_ip = "192.168.1.61"  # Modify with the IP address of your server
+server_ip = ""  # Modify with the IP address of your server
 server_port = 8000  # Modify with the port of your server
 
 # Create a socket object
