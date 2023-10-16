@@ -2,7 +2,8 @@ import socket
 import threading
 import math
 
-def distance(lat1, lon1, lat2, lon2):
+
+def distanceCalc(lat1, lon1, lat2, lon2):
     # Calculate the distance between the two coordinates using the Haversine formula
     R = 6371  # Radius of the earth in km
     dLat = math.radians(lat2 - lat1)
@@ -13,25 +14,32 @@ def distance(lat1, lon1, lat2, lon2):
     distance = R * c
     return distance
 
+
 def handle_client(client_socket):
-    # Receive the latitude and longitude of the first coordinate from the client
-    received_data = client_socket.recv(1024).decode()
-    coordinates = received_data.split(";")
+    try:
+        # Get the client's address and port
+        client_address, client_port = client_socket.getpeername()
+        print(f"Client connected from {client_address}:{client_port}")
 
-    if len(coordinates) != 2:
-        print("Invalid packet:", received_data)
-    else:
-        coordinates1 = coordinates[0].split(",")
-        lat1, lon1 = map(float, coordinates1)
-        coordinates2 = coordinates[1].split(",")
-        lat2, lon2 = map(float, coordinates2)
+        # Receive the latitude and longitude coordinates from the client
+        received_data = client_socket.recv(1024).decode()
+        coordinates = received_data.split(";")
 
-    distance = distance(lat1, lon1, lat2, lon2)
-    # Send the distance back to the client
-    client_socket.send(str(distance).encode())
+        if len(coordinates) != 2:
+            print("Invalid packet:", received_data)
+        else:
+            coordinates1 = coordinates[0].split(",")
+            lat1, lon1 = map(float, coordinates1)
+            coordinates2 = coordinates[1].split(",")
+            lat2, lon2 = map(float, coordinates2)
 
-    # Close the client socket
-    client_socket.close()
+        distance = distanceCalc(lat1, lon1, lat2, lon2)
+        client_socket.send(str(distance).encode())
+    except Exception as e:
+        print(f"Error while handling client from {client_address}:{client_port}: {e}")
+    finally:
+        client_socket.close()
+
 
 def start_server(host, port):
     # Create a server socket object and bind it to the host and port number
@@ -42,9 +50,11 @@ def start_server(host, port):
     server_socket.listen()
     while True:
         client_socket, client_address = server_socket.accept()
-        client_thread = threading.Thread(target=handle_client, args=(client_socket,))
+        client_thread = threading.Thread(
+            target=handle_client, args=(client_socket,))
         client_thread.start()
+
 
 if __name__ == '__main__':
     # Call the start_server function with the desired host and port number
-    start_server('192.168.1.61', 8000)
+    start_server('', 8000)
